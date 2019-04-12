@@ -39,7 +39,6 @@ class LianjiaSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)  # 爬取到的页面提交给parse方法处理
 
     def parse(self, response):
-        self.browser.save_screenshot('page.png')
         self.page_count += 1
         house_detail_urls = response.xpath('//*[@id="content"]/div[1]/ul/li/div[1]/div[1]/a/@href').extract()
 
@@ -132,25 +131,27 @@ class LianjiaSpider(scrapy.Spider):
                     '//*[@id="mapListContainer"]/ul/li[1]/div/div[1]/span[4]/text()').extract_first()  # 距地铁站直线距离
                 subway_distance = search(r'\d+', subway_distance).group()
             except:
-                subway_site = '无'
-                subway_distance = 0
+                subway_site = None
+                subway_distance = None
 
             if build_area != '暂无数据':
                 build_area = search(r'\d+\.?\d*', build_area).group()
             else:
-                build_area = 0
+                build_area = None
             if inner_area != '暂无数据':
                 inner_area = search(r'\d+\.?\d*', inner_area).group()
             else:
-                inner_area = 0
+                inner_area = None
             if property_age_limit != '暂无数据':
                 property_age_limit = search(r'\d+\.?\d*', property_age_limit).group()
             else:
-                property_age_limit = 0
+                property_age_limit = None
             if community_aver_price != '暂无数据':
                 community_aver_price = search(r'\d+', community_aver_price).group()
             else:
-                community_aver_price = 0;
+                community_aver_price = None
+            if last_trsx == '暂无数据':
+                last_trsx = None
 
             item = LianjiaInfoItem()
             item['name'] = name

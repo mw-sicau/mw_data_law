@@ -17,7 +17,7 @@ class LianjiaInfoSpiderMiddleware(object):
                 spider.browser.get(request.url)
                 spider.browser.execute_script('window.scrollTo(0, document.body.scrollHeight)')
             except TimeoutException as e:
-                print('超时')
+                print('页面访问超时')
                 spider.browser.execute_script('window.stop()')
             sleep(3)
             return HtmlResponse(url=spider.browser.current_url, body=spider.browser.page_source,

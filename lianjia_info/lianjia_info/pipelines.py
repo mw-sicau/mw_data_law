@@ -15,7 +15,7 @@ class LianjiaInfoPipeline(object):
             port=3306,  # 数据库端口
             db='lianjia',  # 数据库名
             user='root',  # 数据库用户名
-            passwd='xn990112..',  # 数据库密码
+            passwd='479803313',  # 数据库密码
             charset='utf8',  # 编码方式
             use_unicode=True)
         # 通过cursor执行增删查改
