@@ -19,45 +19,51 @@ class LianjiaSpider(scrapy.Spider):
         chrome_options.add_argument('--hide-scrollbars')  # 隐藏滚动条, 应对一些特殊页面
         chrome_options.add_argument('blink-settings=imagesEnabled=false')  # 不加载图片, 提升速度
         chrome_options.add_argument('--headless') #浏览器不提供可视化页面. linux下如果系统不支持可视化不加这条会启动失败
+        chrome_options.add_argument('--no-sandbox')  # linux need 让Chrome在root权限下跑
+        chrome_options.add_argument('--disable-dev-shm-usage')
 
         self.browser = webdriver.Chrome(options=chrome_options)
         self.browser.set_page_load_timeout(30)
 
         self.Err_count = 0
         self.house_count = 0
-        self.page_count = 0
 
-    def closed(self, spider):
-        self.browser.close()
-        print('Chrome关闭')
+
 
     def start_requests(self):
+        url = 'https://cd.lianjia.com/ershoufang/'
+        yield scrapy.Request(url=url, callback=self.start_parse)
 
-        urls = ['https://cd.lianjia.com/ershoufang/pg%d/' % i for i in range(1,101)]
+    def start_parse(self, response):
+        district_urls = response.xpath('/html/body/div[3]/div/div[1]/dl[2]/dd/div[1]/div/a/@href').extract()
+        for d_url in district_urls:
+            temp_url = 'https://cd.lianjia.com%s' % d_url
+            yield scrapy.Request(url = temp_url, callback=self.parse)
 
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)  # 爬取到的页面提交给parse方法处理
+
+
 
     def parse(self, response):
-        self.page_count += 1
         house_detail_urls = response.xpath('//*[@id="content"]/div[1]/ul/li/div[1]/div[1]/a/@href').extract()
-
         for url in house_detail_urls:
             yield scrapy.Request(url=url, callback=self.parse_detail)
-        # 继续下一页 有问题
-        # next_page = response.xpath('//*[@id="content"]/div[1]/div[8]/div[2]/div/a[5]/@href').extract_first()
-        # print(next_page)
-        # if next_page is not None:
-        #     next_page = response.urljoin(next_page)
-        #     yield scrapy.Request(next_page, callback=self.parse)
+        #自动翻页
+        next_page_text = response.xpath('//*[@id="content"]/div[1]/div[8]/div[2]/div/a/text()').extract()
+        next_page_url = response.xpath('//*[@id="content"]/div[1]/div[8]/div[2]/div/a/@href').extract()
+        txt_index = next_page_text.index('下一页')
+        if txt_index:
+                next_page = response.urljoin(next_page_url[txt_index])
+                yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_detail(self, response):
         self.house_count += 1
-        print('正在爬取第：%d页，第：%d条数据，错误：%d条' %
-              (self.page_count, self.house_count, self.Err_count))
+        print('正在爬取第：%d条数据，错误：%d条' %
+              (self.house_count, self.Err_count))
         try:
             name = response.xpath(
                 '/html/body/div[5]/div[2]/div[4]/div[1]/a[1]/text()').extract_first()  # 小区名称
+            title = response.xpath(
+                '/html/body/div[3]/div/div/div[1]/h1/text()').extract_first() # 标题
             district = response.xpath(
                 '/html/body/div[5]/div[2]/div[4]/div[2]/span[2]/a[1]/text()').extract_first()  # 行政区划
             house_address = response.xpath(
@@ -121,6 +127,11 @@ class LianjiaSpider(scrapy.Spider):
                 '//*[@id="record"]/div[2]/div[3]/span/text()').extract_first()#月看房数
             view_count = response.xpath(
                 '//*[@id="cartCount"]/text()').extract_first()#总看房数
+            loop_line = response.xpath(
+                '/html/body/div[5]/div[2]/div[4]/div[2]/span[2]/text()[2]').extract_first() #环线
+            plate = response.xpath(
+                '/html/body/div[5]/div[2]/div[4]/div[2]/span[2]/a[2]/text()').extract_first() # 板块
+
             try:
                 subway_line = response.xpath(
                     '//*[@id="mapListContainer"]/ul/li[1]/div/div[2]/text()').extract_first()  # 地铁线路
@@ -155,6 +166,7 @@ class LianjiaSpider(scrapy.Spider):
 
             item = LianjiaInfoItem()
             item['name'] = name
+            item['title'] = title
             item['district'] = district
             item['house_address'] = house_address
             item['total_price'] = total_price
@@ -188,6 +200,13 @@ class LianjiaSpider(scrapy.Spider):
             item['favorite_count'] = favorite_count
             item['view_month_count'] = view_month_count
             item['view_count'] = view_count
+            item['loop_line'] = loop_line
+            item['plate'] = plate
             yield item
         except:
             self.Err_count += 1
+
+    def closed(self, spider):
+        self.browser.close()
+        print('Chrome关闭')
+

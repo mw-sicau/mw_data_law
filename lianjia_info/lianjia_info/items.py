@@ -12,6 +12,7 @@ class LianjiaInfoItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     name = scrapy.Field()
+    title = scrapy.Field()
     district = scrapy.Field()
     total_price = scrapy.Field()
     unit_price = scrapy.Field()
@@ -45,3 +46,5 @@ class LianjiaInfoItem(scrapy.Item):
     favorite_count = scrapy.Field()
     view_month_count = scrapy.Field()
     view_count = scrapy.Field()
+    loop_line = scrapy.Field()
+    plate = scrapy.Field()

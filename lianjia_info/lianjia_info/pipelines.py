@@ -25,19 +25,19 @@ class LianjiaInfoPipeline(object):
         self.cursor.execute(
             """insert into house_info
             values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",  # python操作mysql
-            (item['lianjia_id'], item['name'], item['district'], item['house_address'],
-             item['total_price'], item['unit_price'], item['build_area'],
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s,%s, %s, %s)""",  # python操作mysql
+            (item['lianjia_id'], item['title'], item['name'], item['district'], item['plate'],
+             item['house_address'], item['total_price'], item['unit_price'], item['build_area'],
              item['inner_area'], item['decoretion'], item['house_type'], item['elevator'],
-             item['face'], item['floors'], item['house_structure'],
-             item['build_age'], item['ownership'], item['view_time'],
-             item['build_type'], item['build_structure'], item['EH_ratio'],
-             item['listing_time'], item['last_trsx'], item['property_age_limit'],
+             item['face'], item['floors'], item['house_structure'], item['build_age'],
+             item['ownership'], item['view_time'], item['build_type'], item['build_structure'],
+             item['EH_ratio'], item['listing_time'], item['last_trsx'], item['property_age_limit'],
              item['housing_purposes'], item['property_owned'], item['mortgage_info'],
              item['premises_permit'], item['house_age_limit'], item['community_aver_price'],
              item['subway_site'], item['subway_distance'], item['favorite_count'], item['view_month_count'],
-             item['view_count']
+             item['view_count'], item['loop_line']
              ))
         self.connect.commit()  # 提交sql语句
         return item  # 必须实现返回
