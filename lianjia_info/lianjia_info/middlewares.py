@@ -19,6 +19,6 @@ class LianjiaInfoSpiderMiddleware(object):
             except TimeoutException as e:
                 print('页面访问超时')
                 spider.browser.execute_script('window.stop()')
-            sleep(2)
+            sleep(2) # 设置暂停，以免封IP
             return HtmlResponse(url=spider.browser.current_url, body=spider.browser.page_source,
                                 encoding="utf-8", request=request)
